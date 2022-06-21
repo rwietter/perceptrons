@@ -4,6 +4,7 @@
  */
 package com.ufsm.perceptron;
 
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -11,6 +12,7 @@ import javax.swing.JOptionPane;
  * @author rwietter
  */
 public class TreinamentoPerceptron extends RNA {
+
     public void setPerceptronInput(int[][] data, int[] target, double[] w) {
         this.data = data;
         this.target = target;
@@ -35,9 +37,14 @@ public class TreinamentoPerceptron extends RNA {
             isTrain = false; // não precisa mais modificar os pesos
             epoch++;
             for (int sample = 0; sample < this.sampleTrainNum; sample++) {
+                System.out.println("Sample: " + sample + " | Target: " + this.sampleTrainNum);
                 sumY = 0;
-                for (int i = 0; i < this.inputNeuronsNum; i++) {
-                    sumY = sumY + this.data[sample][i] * this.w[i];
+                try {
+                    for (int i = 0; i < this.inputNeuronsNum; i++) {
+                        sumY = sumY + this.data[sample][i] * this.w[i];
+                    }
+                } catch (Exception e) {
+//                    System.out.println("Error in SumY: " + e.getCause());
                 }
 
                 yIn = sumY + this.bias;
@@ -50,16 +57,17 @@ public class TreinamentoPerceptron extends RNA {
                     y = 0;
                 }
 
-//                System.out.println("Y: "+ y + "| target " + this.target[sample]);
                 if (y != this.target[sample]) {
-//                    System.out.println(y + " " + this.target[sample]);
                     isTrain = true;
-                    for (int i = 0; i < this.inputNeuronsNum; i++) {
-                        this.w[i] = this.w[i] + this.alfa * this.target[sample] * this.data[sample][i];
+                    try {
+                        for (int i = 0; i < this.inputNeuronsNum; i++) {
+                            this.w[i] = this.w[i] + this.alfa * this.target[sample] * this.data[sample][i];
+                        }
+                    } catch (Exception e) {
+//                        System.out.println("Error in weights: " + e.getCause());
                     }
                     this.bias = this.bias + alfa * this.target[sample];
                 }
-//                System.out.println(y != this.target[sample]);
             }
 
         }

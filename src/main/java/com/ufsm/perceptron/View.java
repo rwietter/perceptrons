@@ -11,6 +11,7 @@ import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -28,10 +29,12 @@ public class View extends javax.swing.JFrame {
     private double w[] = {0, 0};
     private double bias;
     private String selectedImagePath;
-    ArrayList arrayPixelImg = new ArrayList();
+    Images images;
+
 
     public View() {
         initComponents();
+        this.images = new Images();
         this.perceptron = new TreinamentoPerceptron();
     }
 
@@ -43,6 +46,8 @@ public class View extends javax.swing.JFrame {
         jL_Image = new javax.swing.JLabel();
         jPanel1 = new javax.swing.JPanel();
         jCB_letra = new javax.swing.JComboBox<>();
+        jTF_result = new javax.swing.JTextField();
+        jLabel1 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jB_teste = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
@@ -81,12 +86,14 @@ public class View extends javax.swing.JFrame {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Selecionar letra"));
 
-        jCB_letra.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z" }));
+        jCB_letra.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "a4", "b1", "c2", "d3", "e4", "f1", "g2", "h2", "i3", "j4", "k1", "l2", "m3", "n4", "o1", "p3", "q2", "r4", "s4", "t2", "u2", "v2", "w1", "x3", "y1", "z3" }));
         jCB_letra.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jCB_letraActionPerformed(evt);
             }
         });
+
+        jLabel1.setText("Resultado");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -94,7 +101,11 @@ public class View extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jCB_letra, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jCB_letra, 0, 96, Short.MAX_VALUE)
+                        .addComponent(jTF_result))
+                    .addComponent(jLabel1))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -102,7 +113,11 @@ public class View extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jCB_letra, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(69, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTF_result, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
@@ -180,7 +195,7 @@ public class View extends javax.swing.JFrame {
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 4, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(16, 16, 16)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -193,142 +208,99 @@ public class View extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jL_ImageMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jL_ImageMouseClicked
-        JFileChooser fileChooser = new JFileChooser();
-
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("IMAGES", "jpg", "png", "jpeg", "bmp");
-        fileChooser.setFileFilter(filter);
-
-        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-        int result = fileChooser.showOpenDialog(null);
-
-        if (result == JFileChooser.APPROVE_OPTION) {
-            try {
-                File selectedFile = fileChooser.getSelectedFile();
-                this.selectedImagePath = selectedFile.getAbsolutePath();
-
-                BufferedImage img = ImageIO.read(new File(this.selectedImagePath));
-                ImageIcon icon = new ImageIcon(img);
-                Image image = icon.getImage().getScaledInstance(this.jL_Image.getWidth(), this.jL_Image.getHeight(), Image.SCALE_SMOOTH);
-                this.jL_Image.setIcon(new ImageIcon(image));
-                this.jL_Image.setToolTipText(selectedImagePath);
-            } catch (IOException ex) {
-                Logger.getLogger(View.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        this.images.searchLoadImage(this.jL_Image, selectedImagePath);
     }//GEN-LAST:event_jL_ImageMouseClicked
 
     private void jCB_letraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCB_letraActionPerformed
+        this.images.setImageOnInterface(this.jCB_letra, this.jL_Image, selectedImagePath);
     }//GEN-LAST:event_jCB_letraActionPerformed
 
-    public ArrayList<BufferedImage> readAllImages() {
-        ArrayList images = new ArrayList();
-        File folder = new File("/home/rwietter/Downloads/BaseDadosLetrasTreinamento-Teste (1)/BaseDadosLetras/Treinamento/");
-        for (final File fileEntry : folder.listFiles()) {
-            String filePath = fileEntry.getAbsolutePath();
-            if (fileEntry.isDirectory()) {
-                // readImagesInFolder(filePath);
-            } else {
-                try {
-                    BufferedImage img = ImageIO.read(new File(filePath));
-                    images.add(img);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return images;
-    }
-
-    public void convertAllImagesInPixels(ArrayList<BufferedImage> images) {
-        for (int i = 0; i < images.size(); i++) {
-            this.imageToPixels(images.get(i));
-        }
-    }
-
-    public void imageToPixels(BufferedImage image) {
-        ArrayList pixelImg = new ArrayList();
-        try {
-            // BufferedImage bufferedImage = ImageIO.read(new File("/home/rwietter/Downloads/BaseDadosLetrasTreinamento-Teste (1)/BaseDadosLetras/Treinamento/a4.bmp"));
-            WritableRaster raster = image.getRaster();
-            int pixel[] = new int[4];
-            for (int y = 0; y < raster.getHeight(); y++) {
-                for (int x = 0; x < raster.getWidth(); x++) {
-                    raster.getPixel(x, y, pixel);
-                    for (int i = 0; i < 1; i++) {
-                        if (pixel[0] == 0) {
-                            pixelImg.add("+");
-                        } else {
-                            pixelImg.add("-");
-                        }
-                    }
-                }
-            }
-            arrayPixelImg.add(pixelImg);
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-        /*
-        int count = 1;
-        for (int i = 0; i < pixelImg.size(); i++) {
-            System.out.print(pixelImg.get(i) + " ");
-            count++;
-            if (count == 30) {
-                System.out.print("\n");
-                count = 0;
-            }
-        }
-        System.out.println("Size of Array is: " + pixelImg.size());
-         */
-    }
-
     private void JB_treinarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_JB_treinarActionPerformed
-        ArrayList<BufferedImage> images = this.readAllImages();
-        this.convertAllImagesInPixels(images);
+        ArrayList<BufferedImage> images = this.images.readAllImages();
+        this.images.convertAllImagesInPixels(images);
 
-        int count = 0;
-        for (int i = 0; i < arrayPixelImg.size(); i++) {
-            ArrayList pixeImg = (ArrayList) arrayPixelImg.get(i);
-            for (int j = 0; j < pixeImg.size(); j++) {
-                System.out.print(pixeImg.get(j) + " ");
-                count++;
-                if (count == 30) {
-                    System.out.print("\n");
-                    count = 0;
-                }
+        int[] target = {
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,};
+
+        int[][] data = new int[104][900];
+        for (int i = 0; i < 24; i++) {
+            ArrayList item = (ArrayList) this.images.arrayPixelImg.get(i);
+            for (int j = 0; j < 900; j++) {
+                data[i][j] = (int) item.get(j);
             }
-            System.out.println("Size of Array is: " + pixeImg.size() + "\n");
         }
-        
-        ArrayList target = new ArrayList();
-        for (int i = 0; i < arrayPixelImg.size(); i++) {
-            ArrayList pixeImg = (ArrayList) arrayPixelImg.get(i);
-            target.add(pixeImg);
-        }
-        ArrayList data = target;
+
         this.perceptron.setPerceptronInput(data, target, this.w);
-//        this.perceptron.train();
+        this.perceptron.train();
 //        this.bias = this.perceptron.getBias();
     }//GEN-LAST:event_JB_treinarActionPerformed
 
     private void jB_testeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jB_testeActionPerformed
         String letter = (String) this.jCB_letra.getSelectedItem();
         String imagePath = this.jL_Image.getToolTipText();
+        ArrayList pixelImg = this.images.ImgToPixel(imagePath);
 
-//        int x1 = this.jCB1.getSelectedIndex();
-//        int x2 = this.jCB2.getSelectedIndex();
-//        int target = this.jCB3.getSelectedIndex() > 0 ? 1 : -1;
-//        int xTest[][] = {{x1, x2}, {}};
-//        int targetTest[] = {target};
-//        TestePerceptron test = new TestePerceptron(xTest, targetTest, this.w, this.bias);
-//        test.test();
-//        int result = test.getResult();
-//        if(result == 0) {
-//            this.jTF_result.setText("Errou");
-//        } else {
-//            this.jTF_result.setText("Acertou");
-//        }
+        int xTest[][] = new int[1][900];
+        try {
+            for (int i = 0; i < 1; i++) {
+                for (int j = 0; j < 900; j++) {
+                    xTest[i][j] = (int) pixelImg.get(j);
+                }
+            }
+        } catch (Exception e) {
+            Logger.getLogger("Error in xTest");
+        }
+
+        for (int i = 0; i < 1; i++) {
+            for (int j = 0; j < 900; j++) {
+                System.out.println(xTest[i][j]);
+            }
+        }
+
+        int[] t = new int[900];
+        for (int i = 0; i < pixelImg.size(); i++) {
+            t[i] = (int) pixelImg.get(i);
+        }
+
+        TestePerceptron test = new TestePerceptron(xTest, t, this.w, this.bias);
+        test.test();
+        int result = test.getResult();
+        if (result == 0) {
+            this.jTF_result.setText("Errou");
+        } else {
+            this.jTF_result.setText("Acertou");
+        }
     }//GEN-LAST:event_jB_testeActionPerformed
+
 
     public static void main(String args[]) {
         try {
@@ -359,10 +331,12 @@ public class View extends javax.swing.JFrame {
     private javax.swing.JButton jB_teste;
     private javax.swing.JComboBox<String> jCB_letra;
     private javax.swing.JLabel jL_Image;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel6;
     private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JTextField jTF_result;
     // End of variables declaration//GEN-END:variables
 }
